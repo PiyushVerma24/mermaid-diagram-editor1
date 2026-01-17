@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Hierarchy - Land Acquisition Case</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 1000px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Court Hierarchy - Land Acquisition Case Flow</h1>
+        <div class="mermaid">
+graph TD
+    %% Court Level Subgraphs
+    subgraph SupremeCourt ["Supreme Court of India"]
+        SC1["<b>2009 Remand:</b> Sets aside 2000 HC order <br/>Remands cross-objections to HC"]
+        SC2["<b>2013 Dismissal:</b> Rejects owner's appeal <br/>vs 2012 enhancement"]
+        SC3["<b>2017 Modification:</b> Affirms 2012 HC order <br/>but reduces land from 14 to 4 cottahs"]
+        SC4["<b>2018 Current SLP:</b> Owners appeal HC's <br/>2018 modification of the decree"]
+    end
+
+    subgraph HighCourt ["Calcutta High Court"]
+        HC1["<b>2000 Order:</b> Dismisses initial appeals <br/>and cross-objections"]
+        HC2["<b>2012 Judgment:</b> Post-SC Remand <br/>Enhances land value to Rs. 3,50,000/cottah"]
+        HC3["<b>Nov 2017 Revision:</b> Sets aside Executing <br/>Court orders; Remands for fresh calculation"]
+        HC4["<b>Feb 2018 Modification:</b> High Court takes its own call <br/>Modifies dues from 85 Cr to a lower sum <br/>Rejects interest after Feb 1997"]
+    end
+
+    subgraph ExecutingCourt ["L.A. Judge / Executing Court - Alipore"]
+        EC1["<b>1994 Award:</b> Reference Court values <br/>land at Rs. 2,68,590/cottah"]
+        EC2["<b>June-Sept 2017:</b> Accepts owner's calculation <br/>of ~85 Cr following SC 2017 order"]
+        EC3["<b>Dec 2017 Final Order:</b> Post-HC Remand <br/>Re-affirms ~85 Cr total dues"]
+    end
+
+    %% Timeline Flow
+    Start(("1976 Requisition")) --> Acquisition["1990 Formal Acquisition"]
+    Acquisition --> EC1
+    EC1 --> HC1
+    HC1 --> SC1
+    SC1 -- "Remanded" --> HC2
+    HC2 --> SC2
+    HC2 --> SC3
+    SC3 -- "To be worked out in 6 months" --> EC2
+    EC2 --> HC3
+    HC3 -- "Remanded for fresh calculation" --> EC3
+    EC3 -- "Challenged by State" --> HC4
+    HC4 -- "Nullified SC Decree?" --> SC4
+
+    %% Styling
+    style SC1 fill:#f96,stroke:#333,stroke-width:2px
+    style SC3 fill:#f96,stroke:#333,stroke-width:2px
+    style HC3 fill:#bbf,stroke:#333,stroke-width:2px
+    style HC4 fill:#bbf,stroke:#333,stroke-width:4px
+    style EC3 fill:#dfd,stroke:#333,stroke-width:2px
+        </div>
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
+

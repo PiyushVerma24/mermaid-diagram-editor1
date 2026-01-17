@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Document Processing Sequence Diagram</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35,
+                mirrorActors: true,
+                bottomMarginAdj: 1,
+                useMaxWidth: true,
+                rightAngles: false,
+                showSequenceNumbers: true
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Document Processing Sequence Diagram</h1>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Lawyer as Lawyer (WhatsApp)
+    participant Meta as WhatsApp Cloud API
+    participant Backend as Node.js Server
+    participant Storage as File Storage (S3/Local)
+    participant DB as Database (SQL)
+    actor Admin as Lawyer (Web App)
+
+    Note over Lawyer, Meta: Step 1: Input
+    Lawyer->>Meta: Forwards Document (PDF/Image)
+    
+    Note over Meta, DB: Step 2: Processing (Invisible to User)
+    Meta->>Backend: Triggers Webhook (Incoming Message)
+    Backend->>Meta: Authenticates & Requests Media URL
+    Meta-->>Backend: Returns Temporary Download URL
+    Backend->>Storage: Downloads & Saves File Securely
+    Backend->>DB: INSERT into 'document_inbox' table
+    Note right of DB: Status: UNASSIGNED\nSender: Lawyer's Phone
+    
+    Backend-->>Lawyer: Sends WhatsApp Reply: "Doc Received ✅"
+
+    Note over DB, Admin: Step 3: Assignment (Web Dashboard)
+    Admin->>Backend: Opens Dashboard (React)
+    Backend-->>Admin: Fetches List from 'document_inbox'
+    Admin->>Backend: Selects Case & Clicks "Assign"
+    Backend->>DB: UPDATE 'documents' SET case_id = X
+    Backend-->>Admin: Success Message
+        </div>
+    </div>
+</body>
+</html>

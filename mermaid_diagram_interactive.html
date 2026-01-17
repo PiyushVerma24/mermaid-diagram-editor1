@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Acquisition Case - Interactive Document Trail</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        /* Dark Mode Variables */
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: white;
+            --bg-tertiary: #fafafa;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-tertiary: #555;
+            --border-color: #e0e0e0;
+            --shadow: rgba(0,0,0,0.1);
+            --shadow-light: rgba(0,0,0,0.05);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #252525;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #c0c0c0;
+            --border-color: #404040;
+            --shadow: rgba(0,0,0,0.3);
+            --shadow-light: rgba(0,0,0,0.2);
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: background-color 0.3s ease;
+        }
+        h1 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-style: italic;
+            transition: color 0.3s ease;
+        }
+        
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .dark-mode-toggle:hover {
+            box-shadow: 0 4px 8px var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        /* Phase Container */
+        .phase-container {
+            margin-bottom: 30px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            transition: all 0.3s ease;
+        }
+        .phase-container.collapsed {
+            max-height: 80px;
+        }
+        .phase-container.expanded {
+            max-height: none;
+        }
+        
+        /* Phase Header */
+        .phase-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+            user-select: none;
+            border-radius: 10px 10px 0 0;
+        }
+        .phase-header:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        .phase-header::after {
+            content: '▼';
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+        .phase-container.collapsed .phase-header::after {
+            transform: rotate(-90deg);
+        }
+        
+        /* Phase Content - Horizontal Flow Layout */
+        .phase-content {
+            padding: 20px;
+            display: none;
+            overflow-x: auto;
+        }
+        .phase-container.expanded .phase-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Event Flow Container */
+        .event-flow {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        /* Event Box - Horizontal/Wide Format */
+        .event-box {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 18px;
+            min-width: 280px;
+            max-width: 320px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px var(--shadow-light);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .event-box:hover {
+            box-shadow: 0 4px 8px var(--shadow);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .event-header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 8px;
+        }
+        .event-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        .event-date {
+            color: var(--text-secondary);
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        
+        .event-summary {
+            color: var(--text-tertiary);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        .event-details {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .event-box.expanded .event-details {
+            display: block;
+        }
+        
+        .details-toggle {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 6px;
+            display: inline-block;
+            user-select: none;
+        }
+        .details-toggle:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .details-toggle::before {
+            content: '▶ ';
+            font-size: 10px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .event-box.expanded .details-toggle::before {
+            transform: rotate(90deg);
+        }
+        
+        .document-list {
+            margin-top: 8px;
+        }
+        .document-item {
+            background: var(--bg-tertiary);
+            border-left: 3px solid #667eea;
+            padding: 6px 10px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+        .document-item:hover {
+            background: var(--bg-primary);
+            transform: translateX(3px);
+        }
+        .document-icon {
+            margin-right: 6px;
+            font-size: 12px;
+        }
+        
+        /* Horizontal Arrow */
+        .arrow-horizontal {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+            align-self: center;
+            flex-shrink: 0;
+            margin: 0 5px;
+        }
+        
+        /* Vertical Arrow (for single column items) */
+        .arrow {
+            text-align: center;
+            color: #667eea;
+            font-size: 20px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .legend h3 {
+            margin-top: 0;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .legend-item {
+            margin: 8px 0;
+            color: var(--text-tertiary);
+        }
+        
+        /* Color coding for different event types */
+        .event-box.sc-decision {
+            border-left: 4px solid #f96;
+        }
+        .event-box.hc-order {
+            border-left: 4px solid #bbf;
+        }
+        .event-box.execution {
+            border-left: 4px solid #dfd;
+        }
+        .event-box.controversial {
+            border-left: 4px solid #f66;
+        }
+        .event-box.current {
+            border-left: 4px solid #9ff;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <div class="container">
+        <h1>Land Acquisition Case - Interactive Document Trail</h1>
+        <div class="subtitle">Click phase headers to expand/collapse • Click "Show Details" to view documents & annexures</div>
+        
+        <!-- Phase 1 -->
+        <div class="phase-container expanded">
+            <div class="phase-header" onclick="togglePhase(this)">
+                Phase 1: 1976-1990 - Requisition to Acquisition
+            </div>
+            <div class="phase-content">
+                <div class="event-flow">
+                    <div class="event-box">
+                        <div class="event-header">
+                            <div class="event-title">Requisition Notification</div>
+                            <div class="event-date">1976-04-23</div>
+                        </div>
+                        <div class="event-summary">
+                            u/s 3(1) WB Land Act 1948 • Premises 83 & 84 A.J.C. Bose Rd
+                        </div>
+                        <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                        <div class="event-details">
+                            <div class="document-list">
+                                <div class="document-item"><span class="document-icon">📄</span> Requisition Order</div>
+                                <div class="document-item"><span class="document-icon">📎</span> Annexure A-1: Original Requisition Document</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-horizontal">→</div>
+                    
+                    <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">Possession Taken</div>
+                        <div class="event-date">1976-04-26</div>
+                    </div>
+                    <div class="event-summary">
+                        Physical possession of land taken by State
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Possession Memo</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure A-2: Possession Certificate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">Writ Petition</div>
+                        <div class="event-date">1976-1989</div>
+                    </div>
+                    <div class="event-summary">
+                        Owners challenge requisition through writ petition
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: WP No. [TBD]</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure A-3: Writ Petition Documents</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box hc-order">
+                    <div class="event-header">
+                        <div class="event-title">HC Order - Finalize Acquisition</div>
+                        <div class="event-date">1989</div>
+                    </div>
+                    <div class="event-summary">
+                        High Court directs State to finalize acquisition process
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: [HC Order Ref]</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure A-4: HC Order Copy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">Formal Acquisition Notification</div>
+                        <div class="event-date">1990-04-07</div>
+                    </div>
+                    <div class="event-summary">
+                        u/s 4(1a) Land Acquisition Act • Formal notification published
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Notification No. [TBD]</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure A-5: Gazette Notification</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 2 -->
+        <div class="phase-container expanded">
+            <div class="phase-header" onclick="togglePhase(this)">
+                Phase 2: 1990-2009 - Initial Valuation & First SC Remand
+            </div>
+            <div class="phase-content">
+                <div class="event-flow">
+                    <div class="event-box">
+                        <div class="event-header">
+                            <div class="event-title">Collector's Award</div>
+                            <div class="event-date">1990-06-19</div>
+                        </div>
+                    <div class="event-summary">
+                        Land @ Rs. 72,416/cottah • Total Rs. 1.2 Cr incl. solatium/interest
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Collector Award</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-1: Award Calculation Sheet</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">Reference u/s 8 to LA Judge</div>
+                        <div class="event-date">1992</div>
+                    </div>
+                    <div class="event-summary">
+                        WB Act reference to Land Acquisition Judge
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: LAR Case No. [TBD]</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-2: Reference Application</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box execution">
+                    <div class="event-header">
+                        <div class="event-title">LA Judge Award</div>
+                        <div class="event-date">1994-02-22</div>
+                    </div>
+                    <div class="event-summary">
+                        Land @ Rs. 2,68,590/cottah • Structure Rs. 3L • Injurious Affection: 4 cottah • Solatium/Interest/RC
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> LA Judge Award</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-3: Detailed Valuation Report</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">State Appeal & Cross-Objection</div>
+                        <div class="event-date">1995</div>
+                    </div>
+                    <div class="event-summary">
+                        FMA 2444/94 (State Appeal) • COT 1423/95 (Claimants Cross-Objection)
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: FMA 2444/94</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Case: COT 1423/95</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-4: State Appeal Memo</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-5: Cross-Objection Memo</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box hc-order">
+                    <div class="event-header">
+                        <div class="event-title">HC Stay Order</div>
+                        <div class="event-date">1995</div>
+                    </div>
+                    <div class="event-summary">
+                        50% withdrawal allowed pending appeal
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: [HC Stay Order]</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-6: Stay Order Copy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box hc-order">
+                    <div class="event-header">
+                        <div class="event-title">HC Judgment - Dismisses Appeals</div>
+                        <div class="event-date">2000-03-03</div>
+                    </div>
+                    <div class="event-summary">
+                        Dismisses both State Appeal & Cross-Objection
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Judgment: FMA 2444/94</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Judgment: COT 1423/95</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-7: Full Judgment Text</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">SC Civil Appeal Filed</div>
+                        <div class="event-date">2001</div>
+                    </div>
+                    <div class="event-summary">
+                        CA 2608/01 - Appeal against HC judgment
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: CA 2608/01</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-8: Appeal Memo</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box sc-decision">
+                    <div class="event-header">
+                        <div class="event-title">SC Remand Order</div>
+                        <div class="event-date">2009-03-25</div>
+                    </div>
+                    <div class="event-summary">
+                        Sets aside 2000 HC order • Remands cross-objections to HC for fresh consideration
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CA 2608/01</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure B-9: SC Remand Order Copy</div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 3 -->
+        <div class="phase-container expanded">
+            <div class="phase-header" onclick="togglePhase(this)">
+                Phase 3: 2012-2017 - Enhancement & Final SC Decree
+            </div>
+            <div class="phase-content">
+                <div class="event-flow">
+                    <div class="event-box hc-order">
+                        <div class="event-header">
+                            <div class="event-title">HC Enhancement Judgment</div>
+                            <div class="event-date">2012-03-07</div>
+                        </div>
+                    <div class="event-summary">
+                        Post-SC Remand • Land @ Rs. 3,50,000/cottah • Structure Rs. 3.54L • Injurious Affection: 14 cottah • Solatium/Interest/RC/12% u/s 23(1A)
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Judgment: COT 1423/95</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-1: Enhanced Valuation Report</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">Owner's SLP - Dismissed</div>
+                        <div class="event-date">2013</div>
+                    </div>
+                    <div class="event-summary">
+                        SLP(CC) 4441/13 • Dismissed 29/4/13
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: SLP(CC) 4441/13</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-2: SLP Documents</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box">
+                    <div class="event-header">
+                        <div class="event-title">CSTC SLP - Converted to CA</div>
+                        <div class="event-date">2013</div>
+                    </div>
+                    <div class="event-summary">
+                        SLP(CC) 9556/13 → CA 4769/13
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: SLP(CC) 9556/13</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Case: CA 4769/13</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-3: Conversion Order</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box sc-decision">
+                    <div class="event-header">
+                        <div class="event-title">SC Interim Order</div>
+                        <div class="event-date">2013-05-09</div>
+                    </div>
+                    <div class="event-summary">
+                        Deposit enhanced amount • Withdraw w/o security + security
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CA 4769/13</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-4: Interim Order Copy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box execution">
+                    <div class="event-header">
+                        <div class="event-title">Execution Proceedings Initiated</div>
+                        <div class="event-date">2013</div>
+                    </div>
+                    <div class="event-summary">
+                        LRA Ex5/13 - Execution case filed
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: LRA Ex5/13</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-5: Execution Application</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box sc-decision">
+                    <div class="event-header">
+                        <div class="event-title">SC Final Judgment</div>
+                        <div class="event-date">2017-04-19</div>
+                    </div>
+                    <div class="event-summary">
+                        CA 4769/13 • Affirms 350k/cottah • Modifies: 14 to 4 cottahs • Pay w/in 6 months
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Judgment: CA 4769/13</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure C-6: Full SC Judgment</div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 4 -->
+        <div class="phase-container expanded">
+            <div class="phase-header" onclick="togglePhase(this)">
+                Phase 4: 2017-2018 - Execution Battle
+            </div>
+            <div class="phase-content">
+                <div class="event-flow">
+                    <div class="event-box execution">
+                        <div class="event-header">
+                            <div class="event-title">Executing Court Order 28</div>
+                            <div class="event-date">2017-06</div>
+                        </div>
+                    <div class="event-summary">
+                        Accepts owner's calculation ~85 Cr following SC 2017 order
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: Ex5/13 Order 28</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-1: Calculation Sheet</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box execution">
+                    <div class="event-header">
+                        <div class="event-title">Executing Court Order 42</div>
+                        <div class="event-date">2017-09</div>
+                    </div>
+                    <div class="event-summary">
+                        Continues calculation process
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: Ex5/13 Order 42</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-2: Interim Calculation</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box execution">
+                    <div class="event-header">
+                        <div class="event-title">Executing Court Order 70</div>
+                        <div class="event-date">2017-09</div>
+                    </div>
+                    <div class="event-summary">
+                        Further calculation details
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: Ex5/13 Order 70</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-3: Detailed Calculation</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box hc-order">
+                    <div class="event-header">
+                        <div class="event-title">HC Revisional Orders</div>
+                        <div class="event-date">2017-11</div>
+                    </div>
+                    <div class="event-summary">
+                        CO 3518/17, CO 3519/17, CO 3520/17 • Sets aside Executing Court orders • Remands for fresh calculation
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CO 3518/17</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CO 3519/17</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CO 3520/17</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-4: Revision Order 1</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-5: Revision Order 2</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-6: Revision Order 3</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box execution">
+                    <div class="event-header">
+                        <div class="event-title">Executing Court Orders 105/106</div>
+                        <div class="event-date">2017-12-19</div>
+                    </div>
+                    <div class="event-summary">
+                        Post-HC Remand • Re-affirms ~85 Cr total dues
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: Ex5/13 Order 105</div>
+                            <div class="document-item"><span class="document-icon">📄</span> Order: Ex5/13 Order 106</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-7: Final Calculation Order</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box controversial">
+                    <div class="event-header">
+                        <div class="event-title">HC Modification Order</div>
+                        <div class="event-date">2018-02-22</div>
+                    </div>
+                    <div class="event-summary">
+                        CO 250/18 • Modifies Executing Court Orders • Deductions: AC unacquired Rs. 17L, Int RC/AC Rs. 80L, Int 15% post-97 Rs. 71Cr • Fresh calc w/in 15 days
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Order: CO 250/18</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-8: Modification Order with Deductions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="arrow-horizontal">→</div>
+                
+                <div class="event-box current">
+                    <div class="event-header">
+                        <div class="event-title">Current SLP in SC</div>
+                        <div class="event-date">2018</div>
+                    </div>
+                    <div class="event-summary">
+                        Civil Appeal 3120/2019 • Owners claim HC nullified SC Decree
+                    </div>
+                    <div class="details-toggle" onclick="toggleDetails(this)">Show Details</div>
+                    <div class="event-details">
+                        <div class="document-list">
+                            <div class="document-item"><span class="document-icon">📄</span> Case: CA 3120/2019</div>
+                            <div class="document-item"><span class="document-icon">📎</span> Annexure D-9: SLP Documents</div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>Legend & Interaction Guide:</h3>
+            <div class="legend-item"><strong>Phase Headers:</strong> Click to expand/collapse entire phase</div>
+            <div class="legend-item"><strong>"Show Details":</strong> Click to expand/collapse document list for each event</div>
+            <div class="legend-item"><strong>Document Items:</strong> Clickable (will link to actual documents in your system)</div>
+            <div class="legend-item"><br/><strong>Color Coding:</strong></div>
+            <div class="legend-item">• <span style="color: #f96;">Orange border</span> - Supreme Court decisions</div>
+            <div class="legend-item">• <span style="color: #bbf;">Blue border</span> - High Court orders</div>
+            <div class="legend-item">• <span style="color: #dfd;">Green border</span> - Executing Court orders</div>
+            <div class="legend-item">• <span style="color: #f66;">Red border</span> - Controversial/modified orders</div>
+            <div class="legend-item">• <span style="color: #9ff;">Cyan border</span> - Current pending matter</div>
+        </div>
+    </div>
+    
+    <script>
+        function togglePhase(header) {
+            const container = header.parentElement;
+            if (container.classList.contains('expanded')) {
+                container.classList.remove('expanded');
+                container.classList.add('collapsed');
+            } else {
+                container.classList.remove('collapsed');
+                container.classList.add('expanded');
+            }
+        }
+        
+        function toggleDetails(toggle) {
+            const eventBox = toggle.parentElement;
+            if (eventBox.classList.contains('expanded')) {
+                eventBox.classList.remove('expanded');
+            } else {
+                eventBox.classList.add('expanded');
+            }
+        }
+        
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const toggle = document.querySelector('.dark-mode-toggle');
+            toggle.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+        
+        // Initialize all phases as expanded and apply saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const phases = document.querySelectorAll('.phase-container');
+            phases.forEach(phase => {
+                phase.classList.add('expanded');
+            });
+            
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const toggle = document.querySelector('.dark-mode-toggle');
+            toggle.textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+    </script>
+</body>
+</html>
