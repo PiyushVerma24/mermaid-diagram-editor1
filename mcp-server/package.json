@@ -1,0 +1,23 @@
+{
+  "name": "mermaid-diagram-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for rendering Mermaid diagrams",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "mermaid",
+    "diagram"
+  ],
+  "author": "Piyush Verma",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "puppeteer": "^21.6.1"
+  }
+}

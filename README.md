@@ -57,6 +57,33 @@ sequenceDiagram
 - [html2pdf.js](https://ekoopmans.github.io/html2pdf.js/) - PDF generation
 - Vanilla JavaScript - No frameworks required
 
+## MCP Server
+
+This project includes an **MCP (Model Context Protocol) Server** that allows AI assistants to render Mermaid diagrams programmatically.
+
+### What is the MCP Server?
+
+The MCP server lets you pass Mermaid code to an AI assistant (like Claude in Cursor) and get rendered output (HTML, SVG, or PDF) automatically. No need to manually copy-paste code into the web editor!
+
+### Quick Start
+
+1. Install dependencies:
+   ```bash
+   cd mcp-server
+   npm install
+   ```
+
+2. Configure in Cursor (or your MCP client):
+   - See `mcp-server/README.md` for detailed configuration
+   - Example config in `mcp-server/cursor-mcp-config.json.example`
+
+3. Use it! Just ask your AI assistant:
+   ```
+   "Render this Mermaid code to HTML: [your code here]"
+   ```
+
+See `mcp-server/README.md` for full documentation.
+
 ## Deployment
 
 This project is deployed on GitHub Pages. Simply open `mermaid_editor.html` in any modern web browser - no server required!

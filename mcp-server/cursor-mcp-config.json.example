@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mermaid-diagram-server": {
+      "command": "node",
+      "args": [
+        "/Users/curlingai/Documents/Piyush/mermaid-diagram-editor/mcp-server/index.js"
+      ],
+      "env": {}
+    }
+  }
+}
