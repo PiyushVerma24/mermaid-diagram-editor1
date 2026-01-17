@@ -155,8 +155,8 @@ class MermaidMCPServer {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
 
-    // Create HTML page with Mermaid
-    const html = `<!DOCTYPE html>
+    // Create HTML page with Mermaid for rendering
+    const renderHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -172,7 +172,7 @@ ${mermaidCode}
 </body>
 </html>`;
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(renderHtml, { waitUntil: 'networkidle0' });
     
     // Wait for mermaid to render
     await page.waitForTimeout(2000);
@@ -194,8 +194,8 @@ ${mermaidCode}
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    // Create standalone HTML
-    const html = `<!DOCTYPE html>
+    // Create standalone HTML output
+    const outputHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -271,7 +271,7 @@ ${mermaidCode}
       content: [
         {
           type: 'text',
-          text: html,
+          text: outputHtml,
         },
       ],
     };
@@ -287,8 +287,8 @@ ${mermaidCode}
     const browser = await this.getBrowser();
     const page = await browser.newPage();
 
-    // Create HTML page with Mermaid
-    const html = `<!DOCTYPE html>
+    // Create HTML page with Mermaid for rendering
+    const renderHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -304,7 +304,7 @@ ${mermaidCode}
 </body>
 </html>`;
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(renderHtml, { waitUntil: 'networkidle0' });
     
     // Wait for mermaid to render
     await page.waitForTimeout(2000);
@@ -337,8 +337,8 @@ ${mermaidCode}
     const browser = await this.getBrowser();
     const page = await browser.newPage();
 
-    // Create HTML page with Mermaid
-    const html = `<!DOCTYPE html>
+    // Create HTML page with Mermaid for PDF rendering
+    const pdfHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -371,7 +371,7 @@ ${mermaidCode}
 </body>
 </html>`;
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(pdfHtml, { waitUntil: 'networkidle0' });
     
     // Wait for mermaid to render
     await page.waitForTimeout(2000);
@@ -418,8 +418,8 @@ ${mermaidCode}
       const browser = await this.getBrowser();
       const page = await browser.newPage();
 
-      // Create HTML page with Mermaid
-      const html = `<!DOCTYPE html>
+      // Create HTML page with Mermaid for validation
+      const validateHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -435,7 +435,7 @@ ${mermaidCode}
 </body>
 </html>`;
 
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(validateHtml, { waitUntil: 'networkidle0' });
       
       // Wait for mermaid to render
       await page.waitForTimeout(2000);
