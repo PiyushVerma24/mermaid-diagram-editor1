@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mermaid Diagram Editor</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg-dark: #121212;
             --bg-panel: #1e1e1e;
             --bg-elevated: #252525;
-            --accent-primary: #C26D4D; /* Burnt Orange from reference */
+            --accent-primary: #C26D4D;
             --accent-glow: rgba(194, 109, 77, 0.3);
             --text-main: #ffffff;
             --text-muted: #a0a0a0;
@@ -33,8 +36,7 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-dark);
-            /* Subtle grid pattern */
-            background-image: 
+            background-image:
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 30px 30px;
@@ -45,65 +47,33 @@
             overflow-x: hidden;
         }
 
-        /* Subtle Vignette */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
         .container {
-            max-width: 1800px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 30px;
+            padding: 20px;
             position: relative;
             z-index: 1;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            gap: 20px;
+            gap: 15px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            margin-bottom: 10px;
+            padding: 0 10px;
         }
 
-        .header-content h1 {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #fff, #bbb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-content p {
-            margin: 5px 0 0 0;
-            color: var(--text-muted);
-            font-size: 0.85em;
-        }
-
-        /* Main Workspace Layout */
         .workspace {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 25px;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
             flex: 1;
-            min-height: 0; /* Important for scroll */
+            min-height: 0;
         }
 
-        /* Panels Shared Styles */
         .panel {
             background: rgba(30, 30, 30, 0.7);
             backdrop-filter: blur(12px);
@@ -113,456 +83,439 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .editor-section {
             grid-column: 1 / 2;
-            display: flex;
-            flex-direction: column;
             gap: 15px;
         }
 
         .preview-section {
             grid-column: 2 / 3;
             position: relative;
-            display: flex;
-            flex-direction: column;
         }
 
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .panel-title {
-            font-size: 1em;
-            font-weight: 500;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Inputs */
-        input[type="text"] {
+        input[type="text"],
+        textarea {
             background: var(--bg-elevated);
             border: 1px solid var(--border-subtle);
             color: var(--text-main);
-            padding: 10px 14px;
             border-radius: 8px;
-            width: 100%;
-            font-family: inherit;
-            font-size: 0.9em;
-            transition: all 0.2s ease;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px var(--accent-glow);
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         textarea {
             flex: 1;
-            width: 100%;
-            background: #151515;
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 15px;
-            color: #d4d4d4;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            line-height: 1.5;
             resize: none;
-            transition: all 0.2s ease;
+            font-size: 13px;
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--text-muted);
-        }
-
-        /* Preview Area */
+        /* Improved Preview Container */
         #preview-container {
             flex: 1;
-            background: white; /* Clean white bg for diagrams */
+            background: white;
             border-radius: 12px;
-            overflow: hidden;
+            overflow: auto;
+            /* Allow scrolling */
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            /* Top align for natural growth */
             justify-content: center;
             position: relative;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+            padding: 40px;
         }
 
         .mermaid {
-            width: 100%;
-            height: 100%;
+            /* Ensure it occupies space needed */
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Zoom Overlay */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 5px 15px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .zoom-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5em;
+            line-height: 1;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            overflow: auto;
+            padding: 0;
+            margin: 0;
         }
 
-        /* Controls & Buttons */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: auto;
+        .zoom-btn:hover {
+            color: var(--accent-primary);
         }
 
         button {
             padding: 12px 16px;
             border: none;
             border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.9em;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            transition: all 0.2s;
         }
 
         .btn-primary {
             background: var(--accent-primary);
-            color: #ffffff;
-            box-shadow: 0 4px 15px var(--accent-glow);
-            grid-column: 1 / -1;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.1);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
+            color: white;
         }
 
         .btn-secondary {
             background: var(--bg-elevated);
-            color: var(--text-main);
+            color: white;
             border: 1px solid var(--border-subtle);
         }
 
         .btn-secondary:hover {
             background: #333;
-            border-color: #555;
         }
 
-        /* Saved Diagrams Sidebar */
         .saved-strip {
-            grid-column: 1 / -1;
             background: rgba(30, 30, 30, 0.7);
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             gap: 15px;
             overflow-x: auto;
-            backdrop-filter: blur(12px);
+            height: 80px;
             align-items: center;
-            height: 100px;
         }
 
         .saved-item {
-            min-width: 180px;
-            max-width: 180px;
-            height: 100%;
+            min-width: 160px;
             background: var(--bg-elevated);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid transparent;
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            border: 1px solid transparent;
         }
 
         .saved-item:hover {
-            border-color: var(--accent-primary);
-            transform: translateY(-2px);
             background: #2a2a2a;
+            border-color: var(--accent-primary);
+            color: white;
         }
 
-        .saved-item h4 {
-            margin: 0 0 4px 0;
-            font-size: 0.85em;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .saved-item span {
-            font-size: 0.7em;
-            color: var(--text-muted);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .workspace {
                 grid-template-columns: 1fr;
-                height: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            .editor-section {
-                min-height: 400px;
-            }
-
-            .preview-section {
-                min-height: 500px;
             }
 
             .container {
                 height: auto;
-                overflow: visible;
+            }
+
+            #preview-container {
+                min-height: 500px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <div class="header-content">
-                <h1>Mermaid Diagram Editor <span style="font-size: 0.5em; vertical-align: middle; border: 1px solid var(--border-subtle); padding: 2px 6px; border-radius: 4px; color: var(--accent-primary);">v2.0</span></h1>
-                <p>Designed for the future of visualization</p>
-            </div>
-            <div>
-                 <a href="https://github.com/PiyushVerma24/mermaid-diagram-editor1" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">
-                    <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                    GitHub
-                 </a>
-            </div>
+            <h1
+                style="margin:0; font-size: 1.4em; background: linear-gradient(90deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Mermaid Editor <span
+                    style="font-size:0.5em; vertical-align:middle; border:1px solid #333; padding:2px 6px; border-radius:4px; color: var(--accent-primary);">v2.1</span>
+            </h1>
+            <a href="https://github.com/PiyushVerma24/mermaid-diagram-editor1" target="_blank"
+                style="color:#666; text-decoration:none; font-size:0.8em;">GitHub</a>
         </div>
 
-        <!-- Main Workspace -->
         <div class="workspace">
-            <!-- Left Panel: Editor -->
             <div class="panel editor-section">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>📝 Editor</span>
-                    </div>
-                </div>
-                
-                <input type="text" id="diagram-name" placeholder="Untitled Diagram" value="My Futuristic Diagram">
-                
+                <input type="text" id="diagram-name" placeholder="Untitled Diagram" value="My Diagram">
                 <textarea id="mermaid-input" spellcheck="false" placeholder="Enter Mermaid code...">sequenceDiagram
     autonumber
     participant U as User
     participant S as System
     
-    rect rgb(30, 30, 30)
-    note right of U: Futuristic Flow
+    note right of U: Visualizing Future UI
     U->>S: Request Data
     S-->>U: Return JSON
+    
+    rect rgb(240, 240, 240)
+    note right of S: Processing
+    S->>S: Internal Validations
     end</textarea>
 
-                <div class="controls">
-                    <button class="btn-primary" onclick="renderDiagram()">
-                        <span>⚡ Render</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn-primary" onclick="renderDiagram()"
+                        style="grid-column: 1 / -1; display:flex; justify-content:center; align-items:center; gap:8px;">
+                        ⚡ Render
                     </button>
-                    <button class="btn-secondary" onclick="saveAsHTML()">
-                        <span>💾 HTML</span>
-                    </button>
-                    <button class="btn-secondary" onclick="saveAsPDF()">
-                        <span>📄 PDF</span>
-                    </button>
+                    <button class="btn-secondary" onclick="saveAsPNG()">📸 PNG</button>
+                    <button class="btn-secondary" onclick="saveAsPDF()">📄 PDF</button>
+                    <button class="btn-secondary" onclick="saveAsSVG()">⚛️ SVG</button>
+                    <button class="btn-secondary" onclick="copyToClipboard()">📋 Copy</button>
                 </div>
             </div>
 
-            <!-- Right Panel: Preview -->
             <div class="panel preview-section">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>👁️ Live Preview</span>
-                    </div>
-                </div>
-                
                 <div id="preview-container">
                     <div id="preview">
-                        <p style="color: #666; font-size: 0.9em;">Ready to render...</p>
+                        <p style="color: #999;">Loading...</p>
+                    </div>
+                    <!-- Moved Zoom into container overlay -->
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomOut()">−</button>
+                        <span id="zoom-level"
+                            style="color:white; font-size:0.9em; font-family:'JetBrains Mono', monospace;">100%</span>
+                        <button class="zoom-btn" onclick="zoomIn()">+</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Saved Strip -->
-            <div class="saved-strip" id="saved-diagrams-list">
-                <!-- Items populated by JS -->
-                <p style="color: var(--text-muted); padding: 0 10px;">No saved diagrams yet.</p>
-            </div>
+            <div class="saved-strip" id="saved-diagrams-list"></div>
         </div>
     </div>
 
     <script>
-        // Initialize Mermaid with a theme that fits
-        mermaid.initialize({ 
+        mermaid.initialize({
             startOnLoad: false,
-            theme: 'base',
-            themeVariables: {
-                primaryColor: '#e0e0e0',
-                primaryTextColor: '#333',
-                primaryBorderColor: '#666',
-                lineColor: '#666',
-                secondaryColor: '#f4f4f4',
-                tertiaryColor: '#fff'
-            },
-            securityLevel: 'loose'
+            theme: 'default',
+            securityLevel: 'loose',
+            logLevel: 'error',
+            fontFamily: 'Inter, sans-serif'
         });
 
+        let currentZoom = 1.0;
         let mermaidCode = '';
-
-        function loadSavedDiagrams() {
-            const saved = localStorage.getItem('mermaidDiagrams');
-            return saved ? JSON.parse(saved) : [];
-        }
-
-        function saveDiagramList(diagrams) {
-            localStorage.setItem('mermaidDiagrams', JSON.stringify(diagrams));
-        }
 
         function renderDiagram() {
             const inputVal = document.getElementById('mermaid-input').value.trim();
             mermaidCode = inputVal;
-            
             const previewDiv = document.getElementById('preview');
-            // const container = document.getElementById('preview-container'); // Not used currently
-            
+
             if (!mermaidCode) {
                 previewDiv.innerHTML = '<p style="color: #999;">Enter Mermaid code</p>';
                 return;
             }
 
             const id = 'mermaid-' + Date.now();
-            previewDiv.innerHTML = '<div class="mermaid" id="' + id + '">' + mermaidCode + '</div>';
+            // Apply zoom inline
+            previewDiv.innerHTML = `<div class="mermaid" id="${id}" style="transform: scale(${currentZoom}); transform-origin: top center; transition: transform 0.2s;">${mermaidCode}</div>`;
 
             mermaid.run({
                 nodes: [document.getElementById(id)]
             }).catch(err => {
-                previewDiv.innerHTML = `
-                    <div style="color: var(--danger); padding: 20px; text-align: center;">
-                        <strong>Syntax Error</strong><br>
-                        <span style="font-size: 0.8em; opacity: 0.8;">${err.message}</span>
-                    </div>`;
+                previewDiv.innerHTML = `<div style="color: var(--danger); padding: 20px;">Syntax Error: ${err.message}</div>`;
             });
 
-            // Save automatically to history if valid and lengthy enough
-            if(mermaidCode.length > 10) addToHistory(mermaidCode);
+            saveToHistory(mermaidCode);
         }
 
-        function addToHistory(code) {
-            // Simplified history implementation
-            const diagrams = loadSavedDiagrams();
-            const name = document.getElementById('diagram-name').value || 'Untitled';
-            
-            // Avoid duplicates at top of stack (most recent)
-            if (diagrams.length > 0 && diagrams[diagrams.length - 1].code === code) return;
-
-            diagrams.push({
-                name: name,
-                code: code,
-                timestamp: new Date().toISOString()
-            });
-            
-            // Keep only last 10
-            if (diagrams.length > 10) diagrams.shift();
-            
-            saveDiagramList(diagrams);
-            updateSavedDiagramsList();
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.1, 5.0);
+            applyZoom();
         }
 
-        function saveAsHTML() {
-            if (!mermaidCode) return alert('Render a diagram first!');
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.1, 0.2);
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const el = document.querySelector('.mermaid');
+            if (el) {
+                el.style.transform = `scale(${currentZoom})`;
+            }
+            document.getElementById('zoom-level').textContent = Math.round(currentZoom * 100) + '%';
+        }
+
+        // Improved PDF Export
+        function saveAsPDF() {
+            const svg = document.querySelector('.mermaid svg');
+            if (!svg) return alert('Please render diagram first');
+
             const name = document.getElementById('diagram-name').value || 'diagram';
-            
-            const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-    <title>${name}</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"><\/script>
-</head>
-<body style="display:flex;justify-content:center;padding:50px;background:#fff;font-family:sans-serif;">
-    <div class="mermaid">${mermaidCode}</div>
-    <script>mermaid.initialize({startOnLoad:true});<\/script>
-</body>
-</html>`;
 
-            const blob = new Blob([htmlContent], { type: 'text/html' });
+            // Clone the SVG to manipulate it for PDF
+            const clone = svg.cloneNode(true);
+
+            // Get accurate dimensions from SVG bbox
+            const bbox = svg.getBoundingClientRect();
+            // We use the natural size / zoom level to get true resolution
+            // But for PDF we want standard DPI approx
+            let width = bbox.width / currentZoom;
+            let height = bbox.height / currentZoom;
+
+            // Force white background on SVG for PDF (since theme is transparent)
+            clone.style.backgroundColor = 'white';
+            clone.setAttribute('width', width);
+            clone.setAttribute('height', height);
+
+            // Create a temporary container off-screen
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            container.style.background = 'white';
+            container.style.width = (width + 40) + 'px';
+            container.appendChild(clone);
+
+            container.style.position = 'fixed';
+            container.style.top = '-10000px';
+            container.style.left = '-10000px';
+            document.body.appendChild(container);
+
+            const opt = {
+                margin: 10,
+                filename: name + '.pdf',
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: width > height ? 'landscape' : 'portrait' }
+            };
+
+            html2pdf().set(opt).from(container).save().then(() => {
+                document.body.removeChild(container);
+            }).catch(err => {
+                console.error(err);
+                alert('PDF Generation failed. Try saving as PNG instead.');
+                document.body.removeChild(container);
+            });
+        }
+
+        // PNG Export with High Res
+        function saveAsPNG() {
+            const svg = document.querySelector('.mermaid svg');
+            if (!svg) return alert('Render first');
+
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+            const name = document.getElementById('diagram-name').value || 'diagram';
+
+            const img = new Image();
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                // Capture at high resolution (3x)
+                const scale = 3;
+                // Use un-zoomed dimensions for the base
+                const bbox = svg.getBoundingClientRect();
+                const w = bbox.width / currentZoom;
+                const h = bbox.height / currentZoom;
+
+                canvas.width = w * scale;
+                canvas.height = h * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = "white"; // White BG
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const a = document.createElement('a');
+                a.download = name + '.png';
+                a.href = canvas.toDataURL('image/png');
+                a.click();
+            };
+        }
+
+        function saveAsSVG() {
+            const svg = document.querySelector('.mermaid svg');
+            if (!svg) return;
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+            const name = document.getElementById('diagram-name').value || 'diagram';
+            const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${name}.html`;
+            a.download = name + ".svg";
             a.click();
         }
 
-        function saveAsPDF() {
-            const element = document.getElementById('preview-container');
-            const name = document.getElementById('diagram-name').value || 'diagram';
-            
-            html2pdf().set({
-                margin: 10,
-                filename: name + '.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            }).from(element).save();
+        function copyToClipboard() {
+            const code = document.getElementById('mermaid-input').value;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('button[onclick="copyToClipboard()"]');
+                const original = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                setTimeout(() => btn.innerHTML = original, 2000);
+            });
         }
 
-        function updateSavedDiagramsList() {
-            const diagrams = loadSavedDiagrams().reverse(); // Newest first
-            const listDiv = document.getElementById('saved-diagrams-list');
-            
-            if (diagrams.length === 0) {
-                listDiv.innerHTML = '<p style="color: var(--text-muted); padding-left: 10px;">No history yet</p>';
+        // History Management
+        function loadHistory() {
+            try { return JSON.parse(localStorage.getItem('mermaidHistory')) || []; }
+            catch (e) { return []; }
+        }
+
+        function saveToHistory(code) {
+            let hist = loadHistory();
+            const name = document.getElementById('diagram-name').value;
+            // Dedupe
+            if (hist.length > 0 && hist[0].code === code) return;
+            hist.unshift({ name, code, time: Date.now() });
+            if (hist.length > 10) hist.pop();
+            localStorage.setItem('mermaidHistory', JSON.stringify(hist));
+            renderHistoryStrip();
+        }
+
+        function renderHistoryStrip() {
+            const hist = loadHistory();
+            const strip = document.getElementById('saved-diagrams-list');
+            if (hist.length === 0) {
+                strip.innerHTML = '<span style="color:#666; font-size:0.8em; padding-left:10px;">History appears here automatically</span>';
                 return;
             }
-
-            listDiv.innerHTML = diagrams.map((d, i) => `
-                <div class="saved-item" onclick="loadDiagram(${diagrams.length - 1 - i})">
-                    <h4>${d.name}</h4>
-                    <span>${new Date(d.timestamp).toLocaleTimeString()}</span>
+            strip.innerHTML = hist.map((item, i) => `
+                <div class="saved-item" onclick="loadItem(${i})">
+                    <strong>${item.name}</strong><br>
+                    <span style="font-size:0.9em; opacity:0.7">${new Date(item.time).toLocaleTimeString()}</span>
                 </div>
             `).join('');
         }
 
-        function loadDiagram(originalIndex) {
-            const diagrams = loadSavedDiagrams();
-            const d = diagrams[originalIndex];
-            if (d) {
-                document.getElementById('mermaid-input').value = d.code;
-                document.getElementById('diagram-name').value = d.name;
-                renderDiagram();
-            }
+        function loadItem(i) {
+            const hist = loadHistory();
+            document.getElementById('mermaid-input').value = hist[i].code;
+            document.getElementById('diagram-name').value = hist[i].name;
+            renderDiagram();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-             updateSavedDiagramsList();
-             // Auto render the default example
-             setTimeout(renderDiagram, 500);
-        });
-        
-        // Live auto-render
+        // Init
+        setTimeout(() => {
+            renderHistoryStrip();
+            renderDiagram();
+        }, 500);
+
+        // Auto-render
         let timeout;
         document.getElementById('mermaid-input').addEventListener('input', () => {
             clearTimeout(timeout);
-            timeout = setTimeout(renderDiagram, 800);
+            timeout = setTimeout(renderDiagram, 1000);
         });
     </script>
 </body>
+
 </html>
